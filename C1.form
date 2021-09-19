@@ -3,7 +3,7 @@
   <grid id="27dc6" binding="ROOT" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="854" height="506"/>
+      <xy x="20" y="20" width="920" height="506"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -367,31 +367,31 @@
               <text value="Address"/>
             </properties>
           </component>
-          <component id="c5a01" class="javax.swing.JButton" binding="a0Button" default-binding="true">
+          <component id="b185b" class="javax.swing.JRadioButton" binding="a0RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="0"/>
             </properties>
           </component>
-          <component id="bc814" class="javax.swing.JButton" binding="a1Button" default-binding="true">
+          <component id="cb395" class="javax.swing.JRadioButton" binding="a1RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="1"/>
             </properties>
           </component>
-          <component id="18695" class="javax.swing.JButton" binding="a2Button" default-binding="true">
+          <component id="c201a" class="javax.swing.JRadioButton" binding="a2RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="2"/>
             </properties>
           </component>
-          <component id="f0bd3" class="javax.swing.JButton" binding="a3Button" default-binding="true">
+          <component id="89492" class="javax.swing.JRadioButton" binding="a3RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="3"/>
             </properties>
           </component>
-          <component id="7c657" class="javax.swing.JButton" binding="a4Button" default-binding="true">
+          <component id="6c8ac" class="javax.swing.JRadioButton" binding="a4RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="4"/>
@@ -422,7 +422,7 @@
                   <text value="I"/>
                 </properties>
               </component>
-              <component id="e57c2" class="javax.swing.JButton" binding="a5Button" default-binding="true">
+              <component id="d7ca2" class="javax.swing.JRadioButton" binding="a5RadioButton" default-binding="true">
                 <constraints/>
                 <properties>
                   <text value="5"/>
@@ -443,13 +443,13 @@
                   <text value="GPR"/>
                 </properties>
               </component>
-              <component id="b054b" class="javax.swing.JButton" binding="a8Button" default-binding="true">
+              <component id="a538d" class="javax.swing.JRadioButton" binding="a8RadioButton" default-binding="true">
                 <constraints/>
                 <properties>
                   <text value="8"/>
                 </properties>
               </component>
-              <component id="62589" class="javax.swing.JButton" binding="a9Button" default-binding="true">
+              <component id="e8652" class="javax.swing.JRadioButton" binding="a9RadioButton" default-binding="true">
                 <constraints/>
                 <properties>
                   <text value="9"/>
@@ -470,13 +470,13 @@
                   <text value="IXR"/>
                 </properties>
               </component>
-              <component id="a493f" class="javax.swing.JButton" binding="a6Button" default-binding="true">
+              <component id="40463" class="javax.swing.JRadioButton" binding="a6RadioButton" default-binding="true">
                 <constraints/>
                 <properties>
                   <text value="6"/>
                 </properties>
               </component>
-              <component id="3c23e" class="javax.swing.JButton" binding="a7Button" default-binding="true">
+              <component id="88ea3" class="javax.swing.JRadioButton" binding="a7RadioButton" default-binding="true">
                 <constraints/>
                 <properties>
                   <text value="7"/>
@@ -499,37 +499,37 @@
               <text value="Operation"/>
             </properties>
           </component>
-          <component id="ab363" class="javax.swing.JButton" binding="a10Button" default-binding="true">
+          <component id="22894" class="javax.swing.JRadioButton" binding="a10RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="10"/>
             </properties>
           </component>
-          <component id="c876d" class="javax.swing.JButton" binding="a11Button" default-binding="true">
+          <component id="7f2e" class="javax.swing.JRadioButton" binding="a11RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="11"/>
             </properties>
           </component>
-          <component id="698ae" class="javax.swing.JButton" binding="a12Button" default-binding="true">
+          <component id="d47c8" class="javax.swing.JRadioButton" binding="a12RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="12"/>
             </properties>
           </component>
-          <component id="5d579" class="javax.swing.JButton" binding="a13Button" default-binding="true">
+          <component id="1c290" class="javax.swing.JRadioButton" binding="a13RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="13"/>
             </properties>
           </component>
-          <component id="b850f" class="javax.swing.JButton" binding="a14Button" default-binding="true">
+          <component id="13691" class="javax.swing.JRadioButton" binding="a14RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="14"/>
             </properties>
           </component>
-          <component id="28666" class="javax.swing.JButton" binding="a15Button" default-binding="true">
+          <component id="60d94" class="javax.swing.JRadioButton" binding="a15RadioButton" default-binding="true">
             <constraints/>
             <properties>
               <text value="15"/>
