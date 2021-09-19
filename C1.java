@@ -50,6 +50,7 @@ public class C1 {
     private JButton a14Button;
     private JTextField textField13;
     private JTextField textField14;
+    private JButton a15Button;
 
     public C1() {
         LDButton.addActionListener(new ActionListener() {
@@ -176,6 +177,9 @@ public class C1 {
         frame.setContentPane(new C1().ROOT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setBounds(100,100,600,500);
+
+        System.out.println(new MAR().getAddressfromPC(new ProgramCounter()));
+
         frame.setVisible(true);
     }
 }
