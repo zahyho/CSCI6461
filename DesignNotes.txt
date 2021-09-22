@@ -1,0 +1,62 @@
+Rizzu Rohit Bhandari:
+The simulator was designed keeping in mind the functional components discussed in the class and the lecture slides.
+Much effort has been put into replicating the understandings from the slides and class.
+Memory =
+We have a class Memory which is used to emulate the memory.
+The actual memory is a hashtable that stores data as strings. For example = "0000000000000000"
+There are functions to store and load from the memory but these functions can only be used from the Memory control Unit.
+PC =
+Stores the current program pointer and the value.
+The value is the memory address of the  instruction to be executed.
+MCU =
+The Memory Control Unit takes memory address from the MAR and stores data on the MBR to the memory in the store instructions.
+It takes memory address from the MAR and loads the data to MBR in the load instructions.
+MAR =
+The Memory Access register holds the memory address that is to be accessed.
+The MCU takes the value that is store in the MAR.
+MBR =
+The MBR holds the data that is to be stored in the memory or that is loaded from memory. In "load" it is sent into other registers.
+IR =
+IR holds the instructions to be decoded.
+When the "Run" button is pressed, it takes data from mbr.
+When the "Load" or "Store" is pressed we load the IR with the instruction and let the program flow take over.
+IRR =
+Initial Result Register holds the data from the MBR in the load instructions.
+It holds the data that is to be sent to the mbr in the store instructions.
+Parser =
+A parser is used to parse the integer into memory location (String) and vice versa.
+This is required because we need to perform addition while calculating effective memory address.
+Which cannot be done with a String memory address.
+Also to access memory locations because the key of our hashtable is an integer.
+Decoder =
+This class separates each part of the instruction and decodes what each part means.
+Executor =
+Takes the output of the decoder and executes the instructions with the proper flow.
+Example= from irr to mbr, and mcu(mbr,mar) to memory in store instruction.
+Register=
+used to emulate the registers. In the program an array of register objects in used.
+There are 4 flow structures in the program =
+Load =
+1)set IR
+2)decode
+3)execute
+Store =
+1)set IR
+2)decode
+3)execute
+Run =
+1)PC increment
+2)set MAR
+3)set MBR with instruction
+4)move to IR
+5)decode
+6)Execute
+7)loop to 1) till PC = "000..000" HALT
+IPL =
+1)FileBrowser
+2)read line from file
+3)store to memory
+4)store the address to PC
+5)increment PC
+6)loop to 2) till end of file is reached
+7)set PC to initial position for run

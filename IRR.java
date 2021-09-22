@@ -1,16 +1,18 @@
-public class MBR {
+public class IRR {
     /*
-    hold the value before storing in memory and after accessing memory
+    * Initial result register
     * */
     private String value;
-    private int size;
-    MBR(){
-        this.size = 16;
-    }
+
     public void setValue(String value) {
         this.value = value;
     }
+
     public String getValue() {
         return value;
+    }
+
+    public void pushToRegister(Register reg){
+        reg.setValue(this.value);
     }
 }

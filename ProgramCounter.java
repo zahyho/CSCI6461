@@ -1,10 +1,9 @@
 import java.io.*;
 import java.util.*;
 public class ProgramCounter {
-    //memory for the PC
-    private Hashtable<Integer,String> PCMem;
-    //capacity for the PC
-    private int cap;
+    /*
+    * The value of the program counter is the address of the next instruction
+    * */
     //current PC pointer
     private int pointer;
     //current PC value
@@ -14,28 +13,31 @@ public class ProgramCounter {
     //Initializing Program Counter
     ProgramCounter(){
         this.size = 12;
-        this.cap = 4096;
-        this.PCMem = new Hashtable<Integer,String>(cap);
-        for(int i =0;i<cap;i++){
-            this.PCMem.put(i,"000000000000");
-        }
-        this.pointer = 0;
-        this. value = this.PCMem.get(this.pointer);
+        this.pointer = -1;
     }
-    public String nextInstruction(){
-        //check for out of memory in future
-        this.value = this.PCMem.get(this.pointer+1);
-        return this.value;
+    //increment pointer
+    public void incrementPointer(){
+        this.pointer++;
     }
+    //get next instruction
+    public void nextInstruction(Memory mem){
+        this.incrementPointer();
+        String address = mem.getMem(this.pointer);
+        this.setValue(address.substring(4));
+    }
+    //getters and setters
     public String getValue(){
         return this.value;
     }
-
     public void setValue(String value) {
         this.value = value;
     }
 
-    public void load(String data){
-        this.setValue(data);
+    public void setPointer(int pointer) {
+        this.pointer = pointer;
+    }
+
+    public int getPointer() {
+        return pointer;
     }
 }
