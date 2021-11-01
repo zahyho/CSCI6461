@@ -13,7 +13,7 @@ public class ProgramCounter {
     //Initializing Program Counter
     ProgramCounter(){
         this.size = 12;
-        this.pointer = -1;
+        this.pointer = 7; ///TODO should be 16
     }
     //increment pointer
     public void incrementPointer(){

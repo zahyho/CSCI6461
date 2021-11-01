@@ -1,12 +1,7 @@
 import javax.swing.*;
-import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.util.Arrays;
-import java.util.concurrent.TimeUnit;
 
 
 public class C1 {
@@ -57,20 +52,22 @@ public class C1 {
     // Radiobuttons for giving input
     private JRadioButton a5RadioButton;
     private JRadioButton a0RadioButton;
-    private JRadioButton a1RadioButton;
-    private JRadioButton a2RadioButton;
-    private JRadioButton a4RadioButton;
-    private JRadioButton a6RadioButton;
+    private JRadioButton a14RadioButton;
+    private JRadioButton a13RadioButton;
+    private JRadioButton a11RadioButton;
     private JRadioButton a7RadioButton;
+    private JRadioButton a6RadioButton;
     private JRadioButton a8RadioButton;
     private JRadioButton a9RadioButton;
-    private JRadioButton a10RadioButton;
-    private JRadioButton a11RadioButton;
-    private JRadioButton a12RadioButton;
-    private JRadioButton a13RadioButton;
-    private JRadioButton a14RadioButton;
-    private JRadioButton a15RadioButton;
+    private JRadioButton a4RadioButton;
     private JRadioButton a3RadioButton;
+    private JRadioButton a2RadioButton;
+    private JRadioButton a1RadioButton;
+    private JRadioButton a18RadioButton;
+    private JRadioButton a15RadioButton;
+    private JRadioButton a12RadioButton;
+    private JRadioButton a10RadioButton;
+    private JTextArea textArea1;
     // to hold status of the radio buttons
     private char bits[];
     //CPU memory
@@ -95,8 +92,12 @@ public class C1 {
     public Executor executor;
     // initial result register
     public IRR irr;
-    public C1(JFrame frame) {
-        //Initialization
+    // initial code condition
+    public CC cc;
+    // initial cache
+    public Cache cache;
+
+    public void initialization() {
         mem = new Memory();
         registers = new Register[7];
         for(int i =0;i<registers.length;i++){
@@ -111,11 +112,19 @@ public class C1 {
         decoder = new Decoder();
         executor = new Executor();
         irr = new IRR();
-        bits = new char[17];
+        cc = new CC();
+        bits = new char[16];
         for(int i = 0; i <bits.length;i++){
             bits[i]='0';
         }
-        bits[bits.length-1] = '\0';
+        textArea1.setEditable(false);
+        cache = new Cache();
+        //bits[bits.length-1] = '\0';
+    }
+
+    public C1(JFrame frame) {
+        //Initialization
+        initialization();
         /*
         ld buttons read the value of the bits variable
         and set corresponding textfield
@@ -176,55 +185,46 @@ public class C1 {
                 registers[6].setValue(value);
             }
         });
+        // PC Button
         LDButton7.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                char subArray[] = Arrays.copyOfRange(bits,4,16);
-//                String value = String.valueOf(subArray);
-//                textField8.setText(value);
+                char subArray[] = Arrays.copyOfRange(bits,4,16);
+                String value = String.valueOf(subArray);
+                textField8.setText(value);
+                pc.setValue(value);
+                print("PC value is " + value);
+                //System.out.println("PC value is " + value);
             }
         });
+        // MAR Button
         LDButton8.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                char subArray[] = Arrays.copyOfRange(bits,4,16);
-//                String value = String.valueOf(subArray);
-//                textField9.setText(value);
+                char subArray[] = Arrays.copyOfRange(bits,4,16);
+                String value = String.valueOf(subArray);
+                textField9.setText(value);
+                mar.setValue(value);
+                print("MAR value is " + value);
             }
         });
+        // MBR Button
         LDButton9.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-//                String value = String.valueOf(bits);
-//                textField10.setText(value);
+                String value = String.valueOf(bits);
+                textField10.setText(value);
+                mbr.setValue(value);
+                print("MBR value is " + value);
             }
         });
         IPLButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /*
-                * IPL loads the instructions from file into memory and sets PC accordingly
-                * */
-                File file;
-                try {
-                    file = new FileBrowser().Browse();
-                    FileReader fr=new FileReader(file);   //reads the file
-                    BufferedReader br=new BufferedReader(fr);  //creates a buffering character input stream
-                    String line;
-                    int index=64;
-                    while((line=br.readLine())!=null)
-                    {
-                        pc.incrementPointer();
-                        mem.setMem(index,line);
-                        mem.setMem(pc.getPointer(),parser.decToBin(index,16));
-                        System.out.println(parser.decToBin(index,16));
-                        index++;
-                    }
-                    //pc.setPointer(-1);
-                }
-                catch(Exception ex){
-                    System.out.println(e);
-                }
+                initialization();
+                mem.loadIPL();
+                print("IPL Finished!");
+                textField8.setText(Parser.decToBin(pc.getPointer(), 12));
             }
 
         });
@@ -259,165 +259,164 @@ public class C1 {
         SIButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                textArea1.append(textField1.getText() + "\n");
             }
         });
         SSButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
+                if(!mem.getUpload()) {
+                    print("Please upload the IPL file.");
+                } else {
+                    if(mem.getHlt()) {
+                        print("The HLT is trigger!");
+                    } else {
+                        mar.setValue(Parser.decToBin(pc.getPointer(), 12)); // PC -> MAR
+                        mbr.setValue(mem.getMem(Parser.binToDec(mar.getValue()))); // MEM[MAR] -> MBR
+                        ir.setValue(mbr.getValue()); // MBR -> IR
+                        mem.setRun(true);
+                        mem.setHlt(false);
+                        decodeIns();
+                        textField13.setText(Boolean.toString(mem.getHlt()));
+                        textField14.setText(Boolean.toString(mem.getRun()));
+                        updateGUI();
+                    }
+                }
             }
         });
         loadButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /*
-                Performs the LDR instruction but takes in the radio button input to specify registers and address
-                * */
-                String op = "000001"+String.valueOf(bits).substring(0,10);
-                ir.setValue(op);
-                updateGUI();
-                decoder.decode(ir);
-                updateGUI();
-                executor.execute(mem,registers,decoder,mbr,mar,irr,mcu);
-                updateGUI();
-                pc.incrementPointer();
+                System.out.println(mar.getValue());
+                textField10.setText(mem.getMem(Parser.binToDec(mar.getValue())));
+                print("In MAR " + mar.getValue() + ", MBR value is " + mem.getMem(Parser.binToDec(mar.getValue())));
             }
         });
         storeButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                /*
-                Performs the STR instruction but takes in the radio button input to specify registers and address
-                * */
-                String op = "000010"+String.valueOf(bits).substring(0,10);
-                ir.setValue(op);
-                updateGUI();
-                decoder.decode(ir);
-                updateGUI();
-                executor.execute(mem,registers,decoder,mbr,mar,irr,mcu);
-                updateGUI();
-                pc.incrementPointer();
+                mem.setMem(Parser.binToDec(mar.getValue()), mbr.getValue());
+                print("Change MAR " + mar.getValue() + ", MBR value is " + mem.getMem(Parser.binToDec(mar.getValue())));
             }
         });
         ActionListener listener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 //Update the bits array when the radio buttons are changed
-                if(e.getSource()==a0RadioButton){
-                    if(a0RadioButton.isSelected()){
+                if(e.getSource()==a15RadioButton){
+                    if(a15RadioButton.isSelected()){
                         bits[0] = '1';
                     }
                     else{
                         bits[0] = '0';
                     }
                 }
-                else if(e.getSource()==a1RadioButton){
-                    if(a1RadioButton.isSelected()){
+                else if(e.getSource()== a14RadioButton){
+                    if(a14RadioButton.isSelected()){
                         bits[1] = '1';
                     }
                     else{
                         bits[1] = '0';
                     }
                 }
-                else if(e.getSource()==a2RadioButton){
-                    if(a2RadioButton.isSelected()){
+                else if(e.getSource()== a13RadioButton){
+                    if(a13RadioButton.isSelected()){
                         bits[2] = '1';
                     }
                     else{
                         bits[2] = '0';
                     }
                 }
-                else if(e.getSource()==a3RadioButton){
-                    if(a3RadioButton.isSelected()){
+                else if(e.getSource()== a12RadioButton){
+                    if(a12RadioButton.isSelected()){
                         bits[3] = '1';
                     }
                     else{
                         bits[3] = '0';
                     }
                 }
-                else if(e.getSource()==a4RadioButton){
-                    if(a4RadioButton.isSelected()){
+                else if(e.getSource()== a11RadioButton){
+                    if(a11RadioButton.isSelected()){
                         bits[4] = '1';
                     }
                     else{
                         bits[4] = '0';
                     }
                 }
-                else if(e.getSource()==a5RadioButton){
-                    if(a5RadioButton.isSelected()){
+                else if(e.getSource()==a10RadioButton){
+                    if(a10RadioButton.isSelected()){
                         bits[5] = '1';
                     }
                     else{
                         bits[5] = '0';
                     }
                 }
-                else if(e.getSource()==a6RadioButton){
-                    if(a6RadioButton.isSelected()){
+                else if(e.getSource()== a9RadioButton){
+                    if(a9RadioButton.isSelected()){
                         bits[6] = '1';
                     }
                     else{
                         bits[6] = '0';
                     }
                 }
-                else if(e.getSource()==a7RadioButton){
-                    if(a7RadioButton.isSelected()){
+                else if(e.getSource()== a8RadioButton){
+                    if(a8RadioButton.isSelected()){
                         bits[7] = '1';
                     }
                     else{
                         bits[7] = '0';
                     }
                 }
-                else if(e.getSource()==a8RadioButton){
-                    if(a8RadioButton.isSelected()){
+                else if(e.getSource()==a7RadioButton){
+                    if(a7RadioButton.isSelected()){
                         bits[8] = '1';
                     }
                     else{
                         bits[8] = '0';
                     }
                 }
-                else if(e.getSource()==a9RadioButton){
-                    if(a9RadioButton.isSelected()){
+                else if(e.getSource()==a6RadioButton){
+                    if(a6RadioButton.isSelected()){
                         bits[9] = '1';
                     }
                     else{
                         bits[9] = '0';
                     }
                 }
-                else if(e.getSource()==a10RadioButton){
-                    if(a10RadioButton.isSelected()){
+                else if(e.getSource()== a5RadioButton){
+                    if(a5RadioButton.isSelected()){
                         bits[10] = '1';
                     }
                     else{
                         bits[10] = '0';
                     }
                 }
-                else if(e.getSource()==a11RadioButton){
-                    if(a11RadioButton.isSelected()){
+                else if(e.getSource()== a4RadioButton){
+                    if(a4RadioButton.isSelected()){
                         bits[11] = '1';
                     }
                     else{
                         bits[11] = '0';
                     }
                 }
-                else if(e.getSource()==a12RadioButton){
-                    if(a12RadioButton.isSelected()){
+                else if(e.getSource()== a3RadioButton){
+                    if(a3RadioButton.isSelected()){
                         bits[12] = '1';
                     }
                     else{
                         bits[12] = '0';
                     }
                 }
-                else if(e.getSource()==a13RadioButton){
-                    if(a13RadioButton.isSelected()){
+                else if(e.getSource()== a2RadioButton){
+                    if(a2RadioButton.isSelected()){
                         bits[13] = '1';
                     }
                     else{
                         bits[13] = '0';
                     }
                 }
-                else if(e.getSource()==a14RadioButton){
-                    if(a14RadioButton.isSelected()){
+                else if(e.getSource()== a1RadioButton){
+                    if(a1RadioButton.isSelected()){
                         bits[14] = '1';
                     }
                     else{
@@ -425,7 +424,7 @@ public class C1 {
                     }
                 }
                 else{
-                    if(a15RadioButton.isSelected()){
+                    if(a0RadioButton.isSelected()){
                         bits[15] = '1';
                     }
                     else{
@@ -436,20 +435,20 @@ public class C1 {
         };
         // add listener to the radio buttons
         a0RadioButton.addActionListener(listener);
-        a1RadioButton.addActionListener(listener);
-        a2RadioButton.addActionListener(listener);
-        a3RadioButton.addActionListener(listener);
-        a4RadioButton.addActionListener(listener);
+        a14RadioButton.addActionListener(listener);
+        a13RadioButton.addActionListener(listener);
+        a12RadioButton.addActionListener(listener);
+        a11RadioButton.addActionListener(listener);
         a5RadioButton.addActionListener(listener);
         a8RadioButton.addActionListener(listener);
         a9RadioButton.addActionListener(listener);
-        a6RadioButton.addActionListener(listener);
         a7RadioButton.addActionListener(listener);
+        a6RadioButton.addActionListener(listener);
+        a4RadioButton.addActionListener(listener);
+        a3RadioButton.addActionListener(listener);
+        a2RadioButton.addActionListener(listener);
+        a1RadioButton.addActionListener(listener);
         a10RadioButton.addActionListener(listener);
-        a11RadioButton.addActionListener(listener);
-        a12RadioButton.addActionListener(listener);
-        a13RadioButton.addActionListener(listener);
-        a14RadioButton.addActionListener(listener);
         a15RadioButton.addActionListener(listener);
     }
     public void updateGUI(){
@@ -463,11 +462,430 @@ public class C1 {
         textField5.setText(registers[4].getValue());
         textField6.setText(registers[5].getValue());
         textField7.setText(registers[6].getValue());
-        textField8.setText(pc.getValue());
+        textField8.setText(Parser.decToBin(pc.getPointer(), 12));
         textField9.setText(mar.getValue());
         textField10.setText(mbr.getValue());
         textField12.setText(ir.getValue());
     }
+    public void decodeIns(){
+        String opcode = ir.getValue().substring(0,6);
+        String R = ir.getValue().substring(6,8);
+        String IX  = ir.getValue().substring(8,10);
+        String I = ir.getValue().substring(10,11);
+        String address = ir.getValue().substring(11,16);
+        String immed = "";
+        String rx = "";
+        String ry = "";
+        String EA = "";
+        String result = "";
+
+        switch(Parser.binToDec(opcode)) {
+            case 0: //HLT Stops the machine.
+                pc.setPointer(7); ///TODO Should be 16, change later.
+                mem.setRun(false);
+                mem.setHlt(true);
+                textField13.setText(Boolean.toString(mem.getHlt()));
+                textField14.setText(Boolean.toString(mem.getRun())); // Not running
+                break;
+            case 1: // LDR r, x, address[,I] r <- c(EA)
+                EA = calculateEffectiveAddress(I, IX, address);
+                result = mem.getMem(Parser.binToDec(EA));
+                mar.setValue(EA);
+                mbr.setValue(result);
+                registers[Parser.binToDec(R)].setValue(result);
+                translateRtoTextField(Parser.binToDec(R), result);
+                pc.incrementPointer();
+                print("LDR Instruction");
+                break;
+            case 2: // STR r, x, address[,I] Memory(EA) <- c(r)
+                EA = calculateEffectiveAddress(I, IX, address);
+                mar.setValue(EA);
+                mbr.setValue(registers[Parser.binToDec(R)].getValue());
+                cache.add(Parser.binToDec(mar.getValue()), Parser.binToDec(mbr.getValue()));
+                pc.incrementPointer();
+                print("STR Instruction");
+                break;
+            case 3: // LDA r, x, address[,I] r <- EA
+                EA = calculateEffectiveAddress(I, IX, address);
+                registers[Parser.binToDec(R)].setValue(EA);
+                translateRtoTextField(Parser.binToDec(R), EA);
+                pc.incrementPointer();
+                print("LDA Instruction");
+                break;
+            case 41: // LDX x, address[,I] Xx <- c(EA)
+                if(Parser.binToDec(IX) < 1) { // No Index Register 0
+                    print("Index Register 0 is not created!");
+                    break;
+                } else {
+                    EA = calculateEffectiveAddress(I, IX, address);
+                    result = mem.getMem(Parser.binToDec(EA));
+                    mar.setValue(EA);
+                    mbr.setValue(result);
+                    registers[Parser.binToDec(IX + 3)].setValue(result); // I1 = registers[4], I2 = registers[5], I3 = registers[6]
+                    translateIXtoTextField(Parser.binToDec(IX + 3), result);
+                    cache.add(Parser.binToDec(mar.getValue()), Parser.binToDec(mbr.getValue()));
+                    pc.incrementPointer();
+                    print("LDX Instruction");
+                }
+                break;
+            case 42: // STX x, address[,I] Memory(EA) <- c(Xx)
+                if(Parser.binToDec(IX) < 1) { // No Index Register 0
+                    print("Index Register 0 is not created!");
+                    break;
+                } else {
+                    EA = calculateEffectiveAddress(I, IX, address);
+                    mar.setValue(EA);
+                    mbr.setValue(registers[Parser.binToDec(IX + 3)].getValue());
+                    pc.incrementPointer();
+                    print("STX Instruction");
+                }
+                break;
+            case 10: // JZ r, x, address[,I]
+                // Jump If Zero:
+                // If c(r) = 0, then PC <- EA
+                // Else PC <- PC+1
+                if(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) == 0) {
+                    EA = calculateEffectiveAddress(I, IX, address);
+                    pc.setPointer(Parser.binToDec(EA));
+                    print("JZ Instruction");
+                } else {
+                    pc.incrementPointer();
+                    print("JZ Instruction Failed");
+                }
+                break;
+            case 11: // JNE r, x, address[,I]
+                // Jump If Not Equal:
+                // If c(r) != 0, then PC - EA
+                // Else PC <- PC + 1
+                if(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) != 0) {
+                    EA = calculateEffectiveAddress(I, IX, address);
+                    pc.setPointer(Parser.binToDec(EA));
+                    print("JNE Instruction");
+                } else {
+                    pc.incrementPointer();
+                    print("JNE Instruction Failed");
+                }
+                break;
+            case 12: // JCC cc, x, address[,I]
+                // Jump If Condition Code
+                // cc replaces r for this instruction
+                // cc takes values 0, 1, 2, 3 as above and specifies the bit in the Condition Code Register to check;
+                // If cc bit  = 1, PC <- EA
+                // Else PC <- PC + 1
+                if(cc.getValueByPlace(Parser.binToDec(R)) == true) {
+                    EA = calculateEffectiveAddress(I, IX, address);
+                    pc.setPointer(Parser.binToDec(EA));
+                    print("JCC Instruction");
+                } else {
+                    pc.incrementPointer();
+                    print("JCC Instruction Failed");
+                }
+                break;
+            case 13: // JMA x, address[,I]
+                // Unconditional Jump To Address
+                // PC <- EA,
+                // Note: r is ignored in this instruction
+                EA = calculateEffectiveAddress(I, IX, address);
+                pc.setPointer(Parser.binToDec(EA));
+                print("JMA Instruction");
+                break;
+            case 14: // JSR x, address[,I]
+                // Jump and Save Return Address:
+                // R3 <- PC+1;
+                // PC <- EA
+                // R0 should contain pointer to arguments
+                // Argument list should end with –1 (all 1s) value
+                EA = calculateEffectiveAddress(I, IX, address);
+                registers[3].setValue(Parser.decToBin(pc.getPointer() + 1, 16));
+                pc.setPointer(Parser.binToDec(EA));
+                print("JSR Instruction");
+                break;
+            case 15: // RFS Immed
+                // Return From Subroutine w/ return code as Immed portion (optional) stored in the instruction’s address field.
+                // R0 <- Immed; PC <- c(R3)
+                // IX, I fields are ignored.
+                registers[0].setValue(address);
+                pc.setPointer(Parser.binToDec(registers[3].getValue()));
+                print("RFS Instruction");
+                break;
+            case 16: // SOB r, x, address[,I]
+                // Subtract One and Branch. R = 0..3
+                // r <- c(r) – 1
+                // If c(r) > 0,  PC <- EA;
+                // Else PC <- PC + 1
+                EA = calculateEffectiveAddress(I, IX, address);
+                registers[Parser.binToDec(R)].setValue(Parser.decToBin(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) - 1, 16));
+                if(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) > 0) {
+                    pc.setPointer(Parser.binToDec(EA));
+                    print("SOB Instruction");
+                } else {
+                    pc.incrementPointer();
+                    print("SOB Instruction Failed");
+                }
+                break;
+            case 17: // JGE r,x, address[,I]
+                // Jump Greater Than or Equal To:
+                // If c(r) >= 0, then PC <- EA
+                // Else PC <- PC + 1
+                EA = calculateEffectiveAddress(I, IX, address);
+                if(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) >= 0) {
+                    pc.setPointer(Parser.binToDec(EA));
+                    print("JGE Instruction");
+                } else {
+                    pc.incrementPointer();
+                    print("JGE Instruction Failed");
+                }
+                break;
+            case 4: // AMR r, x, address[,I]
+                // Add Memory To Register, r = 0..3
+                //r <- c(r) + c(EA)
+                EA = calculateEffectiveAddress(I, IX, address);
+                result = mem.getMem(Parser.binToDec(EA));
+                int temp = Parser.binToDec(registers[Parser.binToDec(R)].getValue()) + Parser.binToDec(result);
+                if(temp > 65535) { // check whether the sum is greater the maximum of 16 bits binary
+                    cc.setOverflow(true);
+                    print("AMR Instruction overflow");
+                } else {
+                    registers[Parser.binToDec(R)].setValue(Parser.decToBin(temp, 16));
+                    print("AMR Instruction");
+                }
+                pc.incrementPointer();
+                break;
+            case 5: // SMR r, x, address[,I]
+                // Subtract Memory From Register, r = 0..3
+                // r <- c(r) – c(EA)
+                EA = calculateEffectiveAddress(I, IX, address);
+                result = mem.getMem(Parser.binToDec(EA));
+                temp = Parser.binToDec(registers[Parser.binToDec(R)].getValue()) - Parser.binToDec(result);
+                registers[Parser.binToDec(R)].setValue(Parser.decToBin(temp, 16));
+                print("SMR Instruction");
+                pc.incrementPointer();
+                break;
+            case 6: // AIR r, immed
+                // Add  Immediate to Register, r = 0..3
+                // r <- c(r) + Immed
+                // Note:
+                // 1. if Immed = 0, does nothing
+                // 2. if c(r) = 0, loads r with Immed
+                // IX and I are ignored in this instruction
+                immed = address;
+                if(Parser.binToDec(immed) != 0) {
+                    if(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) == 0) {
+                        registers[Parser.binToDec(R)].setValue(immed);
+                        print("AIR Instruction c(r) = 0");
+                    } else {
+                        temp = Parser.binToDec(registers[Parser.binToDec(R)].getValue()) + Parser.binToDec(immed);
+                        if(temp > 65535) { // check whether the sum is greater the maximum of 16 bits binary
+                            cc.setOverflow(true);
+                            print("AIR Instruction overflow");
+                        } else {
+                            registers[Parser.binToDec(R)].setValue(Parser.decToBin(temp, 16));
+                            print("AIR Instruction");
+                        }
+                    }
+                } else {
+                    print("AIR Instruction immed = 0");
+                }
+                pc.incrementPointer();
+                break;
+            case 7: // SIR r, immed
+                // Subtract  Immediate  from Register, r = 0..3
+                // r <- c(r) - Immed
+                // Note:
+                // 1. if Immed = 0, does nothing
+                // 2. if c(r) = 0, loads r1 with –(Immed)
+                // IX and I are ignored in this instruction
+                immed = address;
+                if(Parser.binToDec(immed) != 0) {
+                    if(Parser.binToDec(registers[Parser.binToDec(R)].getValue()) == 0) {
+                        temp = Parser.binToDec(immed) * -1;
+                        if (temp >= 0) { // check whether need to fit the length
+                            String fitLength = Integer.toBinaryString(temp);
+                            while (fitLength.length() < 32) {
+                                fitLength = "0" + fitLength;
+                            }
+                            registers[Parser.binToDec(R)].setValue(fitLength.substring(16, 32)); // Only get last 16 bits in Integer
+                        } else {
+                            registers[Parser.binToDec(R)].setValue(Integer.toBinaryString(temp).substring(16, 32)); // Only get last 16 bits in Integer
+                        }
+                        print("SIR Instruction c(r) = 0");
+                    } else {
+                        temp = Parser.binToDec(registers[Parser.binToDec(R)].getValue()) - Parser.binToDec(immed);
+                        registers[Parser.binToDec(R)].setValue(Parser.decToBin(temp, 16));
+                        print("SIR Instruction");
+                    }
+                } else {
+                    print("SIR Instruction immed = 0");
+                }
+                pc.incrementPointer();
+                break;
+            case 20: // MLT rx,ry
+                // Multiply Register by Register
+                // rx, rx+1 <- c(rx) * c(ry)
+                // rx must be 0 or 2
+                // ry must be 0 or 2
+                // rx contains the high order bits, rx+1 contains the low order bits of the result
+                // Set OVERFLOW flag, if overflow
+                rx = R;
+                ry = IX;
+                if((Parser.binToDec(rx) == 0 || Parser.binToDec(rx) == 2) && (Parser.binToDec(ry) == 0 || Parser.binToDec(ry) == 2)) {
+                    long bigTemp = Parser.binToDec(registers[Parser.binToDec(rx)].getValue()) * Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue());
+                    if(bigTemp > 4294967295L) { // check whether the sum is greater the maximum of 32 bits binary
+                        cc.setOverflow(true);
+                        print("MLT Instruction overflow");
+                    } else {
+                        String fitLength = Integer.toBinaryString((int) bigTemp);
+                        while (fitLength.length() < 32) {
+                            fitLength = "0" + fitLength;
+                        }
+                        registers[Parser.binToDec(rx)].setValue(fitLength.substring(0, 16));
+                        registers[Parser.binToDec(rx + 1)].setValue(fitLength.substring(16, 32));
+                        print("MLT Instruction");
+                    }
+                } else {
+                    print("MLT Instruction rx or ry are not equal to 0 or 2");
+                }
+                pc.incrementPointer();
+                break;
+            case 21: // DVD rx,ry
+                // Divide Register by Register
+                // rx, rx+1 <- c(rx)/ c(ry)
+                // rx must be 0 or 2
+                // rx contains the quotient; rx+1 contains the remainder
+                // ry must be 0 or 2
+                // If c(ry) = 0, set cc(3) to 1 (set DIVZERO flag)
+                rx = R;
+                ry = IX;
+                if((Parser.binToDec(rx) == 0 || Parser.binToDec(rx) == 2) && (Parser.binToDec(ry) == 0 || Parser.binToDec(ry) == 2)) {
+                    if(Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue()) == 0) {
+                        cc.setDivzero(true);
+                        print("DVD Instruction divided by zero");
+                    } else {
+                        int quotient = Parser.binToDec(registers[Parser.binToDec(rx)].getValue()) /  Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue());
+                        int reminder = Parser.binToDec(registers[Parser.binToDec(rx)].getValue()) %  Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue());
+                        registers[Parser.binToDec(rx)].setValue(Parser.decToBin(quotient, 16));
+                        registers[Parser.binToDec(rx + 1)].setValue(Parser.decToBin(reminder, 16));
+                        print("DVD Instruction");
+                    }
+                } else {
+                    print("DVD Instruction rx or ry are not equal to 0 or 2");
+                }
+                pc.incrementPointer();
+                break;
+            case 22: // TRR rx, ry
+                // Test the Equality of Register and Register
+                // If c(rx) = c(ry), set cc(4) <- 1; else, cc(4) <- 0
+                rx = R;
+                ry = IX;
+                if(Parser.binToDec(registers[Parser.binToDec(rx)].getValue()) == Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue())) {
+                    cc.setEqualornot(true);
+                    print("TRR Instruction rx is equal to ry (EQUALORNOT)");
+                } else {
+                    cc.setEqualornot(false);
+                    print("TRR Instruction rx is not equal to ry");
+                }
+                pc.incrementPointer();
+                break;
+            case 23: // AND rx, ry
+                // Logical And of Register and Register
+                // c(rx) <- c(rx) AND c(ry)
+                rx = R;
+                ry = IX;
+                registers[Parser.binToDec(rx)].setValue(Parser.decToBin(Parser.binToDec(registers[Parser.binToDec(rx)].getValue()) & Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue()), 16));
+                print("AND Instruction");
+                pc.incrementPointer();
+                break;
+            case 24: // ORR rx, ry
+                // Logical Or of Register and Register
+                // c(rx) <- c(rx) OR c(ry)
+                rx = R;
+                ry = IX;
+                registers[Parser.binToDec(rx)].setValue(Parser.decToBin(Parser.binToDec(registers[Parser.binToDec(rx)].getValue()) | Parser.binToDec(registers[Parser.binToDec(ry + 3)].getValue()), 16));
+                print("ORR Instruction");
+                pc.incrementPointer();
+                break;
+            case 25: // NOT rx
+                // Logical Not of Register To Register
+                // C(rx) <- NOT c(rx)
+                rx = R;
+                String flipString = "";
+                String fitLength = registers[Parser.binToDec(rx)].getValue();
+                while (fitLength.length() < 16) {
+                    fitLength = "0" + fitLength;
+                }
+                for(int i = 0; i < fitLength.length(); i++) {
+                    if(fitLength.charAt(i) == '0') {
+                        flipString += "1";
+                    } else {
+                        flipString += "0";
+                    }
+                }
+                registers[Parser.binToDec(rx)].setValue(flipString);
+                print("NOT Instruction");
+                pc.incrementPointer();
+                break;
+            default:
+                print("The opcode is not listed!");
+                break;
+        }
+    }
+    public void translateRtoTextField(int r, String result) {
+        switch(r) {
+            case 0:
+                textField1.setText(result);
+                break;
+            case 1:
+                textField2.setText(result);
+                break;
+            case 2:
+                textField3.setText(result);
+                break;
+            case 3:
+                textField4.setText(result);
+                break;
+        }
+    }
+    public void translateIXtoTextField(int IX, String result) {
+        switch(IX) {
+            case 1:
+                textField5.setText(result);
+                break;
+            case 2:
+                textField6.setText(result);
+                break;
+            case 3:
+                textField7.setText(result);
+                break;
+        }
+    }
+    public String calculateEffectiveAddress(String I, String IX, String address) {
+        String result = "";
+
+        if (Parser.binToDec(I) == 0) { // NO indirect addressing
+            if (Parser.binToDec(IX) == 0) { // IX == 00
+                result = address;
+                //result = mem.getMem(Parser.binToDec(address));
+            } else { // IX == 1..3 EA = c(IX) + c(Address Field)
+                int EA = Parser.binToDec(address) + Parser.binToDec(registers[Parser.binToDec(IX) + 3].getValue()); // I1 = registers[4], I2 = registers[5], I3 = registers[6]
+                result = Parser.decToBin(EA, 16);
+                //result = mem.getMem(EA);
+            }
+        } else {
+            if (Parser.binToDec(IX) == 0) { // indirect addressing, but NO indexing
+                result = mem.getMem(Parser.binToDec(address));
+                //result = mem.getMem(Parser.binToDec(mem.getMem(Parser.binToDec(address))));
+            } else { // both indirect addressing and indexing
+                int EA = Parser.binToDec(address) + Parser.binToDec(registers[Parser.binToDec(IX) + 3].getValue());
+                result = mem.getMem(EA);
+                //result = mem.getMem(Parser.binToDec(mem.getMem(EA)));
+            }
+        }
+        return result;
+    }
+    public void print(String result) {
+        textArea1.append(result + "\n");
+    }
+
     public static void main(String[] args) {
         /*
         Main function
@@ -476,7 +894,7 @@ public class C1 {
         C1 c1 = new C1(frame);
         frame.setContentPane(c1.ROOT);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBounds(100,100,600,500);
+        frame.setBounds(100,100,950,700);
         frame.setVisible(true);
     }
 }

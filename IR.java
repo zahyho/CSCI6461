@@ -18,9 +18,4 @@ public class IR {
 
         this.value = value;
     }
-
-    public String decodeIns(String instruction){
-
-        return "";
-    }
 }

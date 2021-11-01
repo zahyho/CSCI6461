@@ -4,7 +4,7 @@ public class Parser {
     // to parse the binary to deimal and decimal to binary
 
     //bin to decimal
-    public int binToDec(String bin){
+    public static int binToDec(String bin){
         String temp = "";
         for(String st:bin.split(" ")){
             temp += st;
@@ -14,7 +14,7 @@ public class Parser {
 
     //decimal to binary and gives output in specified length
     //useful for 12 and 16bits registers
-    public String decToBin(int dec,int size){
+    public static String decToBin(int dec,int size){
         String binString = Integer.toBinaryString(dec);
         int length = binString.length();
         int numZeros = size-length;
