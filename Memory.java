@@ -97,6 +97,7 @@ public class Memory {
             //Close the input stream
             in.close();
         }catch (Exception e){
+            System.err.println(e);
             System.err.println("Could not find IPL file!");
         }
     }
